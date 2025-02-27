@@ -1,0 +1,15 @@
+// 4-Node Boolean Network Wiring Diagram
+digraph {
+	rankdir=LR
+	A [label=A]
+	B [label=B]
+	C [label=C]
+	D [label=D]
+	C -> A
+	C -> B
+	D -> B
+	D -> C
+	B -> C
+	B -> D
+	A -> D
+}
