@@ -1,42 +1,81 @@
 from graphviz import Digraph
 from itertools import product
 
+from rules import RuleLoader
+from graphviz import Digraph
+
 
 class BooleanNetwork:
-    def __init__(self, rules_function, node_count, rules):
+    def __init__(self, entity_count, rule_source="manual"):
         """
         Initialize the Boolean Network.
 
         Args:
-        - rules_function: Function defining the state transition rules.
-        - node_count: Number of nodes in the Boolean Network (default: 4).
+        - entity_count: Number of entities in the Boolean Network (fixed).
+        - rule_source: Source of rules ('gui' or 'manual')
         """
-        self.rules_function = rules_function
-        self.node_count = node_count
-        self.nodes = [f"N{i + 1}" for i in range(node_count)]
-        self.states = [f"{i:0{node_count}b}" for i in range(2 ** node_count)] # convert all 2^n states to binary strings of n bits
-        self.states = rules
+        self.entity_count = entity_count
+        self.nodes = [f"N{i + 1}" for i in range(entity_count)]
+        self.states = [f"{i:0{entity_count}b}" for i in range(2 ** entity_count)]
+
+        # Initialize RuleLoader as a blueprint for rules
+        self._rule_loader = RuleLoader(entity_count)
+        self.initial_rules = self._rule_loader.load_rules(rule_source)
+        self.current_rules = self.initial_rules.copy()
+
+        # Check that the number of rules matches the number of entities
+        self._validate_rules()
+
+    def _validate_rules(self):
+        """
+        Checks that the number of rules matches the number of entities.
+        """
+        if len(self.current_rules) != self.entity_count:
+            raise ValueError("Number of rules must match the number of entities")
 
     def get_next_state(self, current_state):
+        """
+        Calculates the next state for each entity using current_rules.
+
+        Args:
+        - current_state: A list of integers representing the current state of each entity.
+
+        Returns:
+        - next_state: A list of integers representing the next state of each entity.
+        """
         next_state = []
-        for i, rule in enumerate(self.rules):
-            next_state.append(rule(current_state, i))  # Pass index to rule for adaptability
+        for i, rule in enumerate(self.current_rules):
+            if rule is not None:
+                next_state.append(rule(current_state, i))
+            else:
+                next_state.append(current_state[i])  # If no rule, keep current state
         return next_state
+
+    def get_state_transition(self):
+        """
+        Generates all state transitions for the Boolean Network.
+
+        Returns:
+        - transitions: A dictionary with current state as keys and next state as values.
+        """
+        transitions = {}
+        for state in self.states:
+            current_state = list(map(int, state))
+            next_state = self.get_next_state(current_state)
+            next_state_str = ''.join(map(str, next_state))
+            transitions[state] = next_state_str
+        return transitions
 
     def generate_state_graph(self, filename='state_graph'):
         """
         Generates the state graph for the Boolean Network.
         """
-        dot = Digraph(comment=f'{self.node_count}-Node Boolean Network State Graph')
+        dot = Digraph(comment=f'{self.entity_count}-Entity Boolean Network State Graph')
         dot.attr(rankdir='LR')
 
-        for state in self.states:
-            current_state = list(map(int, state))
-            next_state = self.rules_function(*current_state)
-            next_state_str = ''.join(map(str, next_state))
-
+        for state, next_state in self.get_state_transition().items():
             dot.node(state, state)
-            dot.edge(state, next_state_str, label=f"{state} → {next_state_str}")
+            dot.edge(state, next_state, label=f"{state} → {next_state}")
 
         dot.render(filename, format='png', view=True)
 
@@ -51,11 +90,11 @@ class BooleanNetwork:
 
         for state in self.states:
             current_state = list(map(int, state))
-            next_state = self.rules_function(*current_state)
+            next_state = self.get_next_state(current_state)
             next_state_str = ''.join(map(str, next_state))
 
             transition_desc = ", ".join(
-                [f"{self.nodes[i]}'={current_state[i]}->{next_state[i]}" for i in range(self.node_count)]
+                [f"{self.nodes[i]}'={current_state[i]}->{next_state[i]}" for i in range(self.entity_count)]
             )
             print(f"  {' '.join(state)} | {' '.join(map(str, next_state))} | {transition_desc}")
 
@@ -72,7 +111,7 @@ class BooleanNetwork:
             while current_state not in visited:
                 visited[current_state] = len(visited)
                 current_state_list = list(map(int, list(current_state)))
-                next_state_list = self.rules_function(*current_state_list)
+                next_state_list = self.get_next_state(current_state_list)
                 next_state = ''.join(map(str, next_state_list))
                 current_state = next_state
 
