@@ -10,6 +10,6 @@ digraph {
 	D -> B
 	D -> C
 	B -> C
-	B -> D
 	A -> D
+	B -> D
 }

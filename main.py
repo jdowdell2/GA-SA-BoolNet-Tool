@@ -12,7 +12,7 @@ def generate_boolean_network_graph(rules_function, filename='4_node_state_graph'
     """
     # Initialise Graphviz Digraph
     dot = Digraph(comment='4-Node Boolean Network State Graph')
-    dot.attr(rankdir='LR')
+    dot.attr(rankdir='TB')
 
     # Generate state transitions for all 16 states (0000 to 1111)
     states = [f"{i:04b}" for i in range(16)]
@@ -183,32 +183,43 @@ def example_rules_3(A, B, C, D):
     D_next = A and B
     return int(A_next), int(B_next), int(C_next), int(D_next)
 
+def poster_rules(A, B, C, D):
+    A_next = B
+    B_next = C
+    C_next = D
+    D_next = A or C
+    return int(A_next), int(B_next), int(C_next), int(D_next)
+
 
 # === 8. RUNNING THE SIMULATIONS ===
-print("\n=== Original Boolean Network ===")
-generate_truth_table(original_rules)
-detect_attractors(original_rules)
-generate_boolean_network_graph(original_rules, filename='Wiring Verifications/original_network_graph')
-generate_wiring_diagram(original_rules, filename='Wiring Verifications/original_wiring_diagram')
+#print("\n=== Original Boolean Network ===")
+#generate_truth_table(original_rules)
+#detect_attractors(original_rules)
+#generate_boolean_network_graph(original_rules, filename='Wiring Verifications/original_network_graph')
+#generate_wiring_diagram(original_rules, filename='Wiring Verifications/original_wiring_diagram')
 
 # --- Feedback Loop Network ---
-print("\n=== Feedback Loop Network ===")
-generate_truth_table(example_rules_1)
-detect_attractors(example_rules_1)
-generate_boolean_network_graph(example_rules_1, filename='Wiring Verifications/feedback_loop_graph')
-generate_wiring_diagram(example_rules_1, filename='Wiring Verifications/feedback_loop_wiring')
+#print("\n=== Feedback Loop Network ===")
+#generate_truth_table(example_rules_1)
+#detect_attractors(example_rules_1)
+#generate_boolean_network_graph(example_rules_1, filename='Wiring Verifications/feedback_loop_graph')
+#generate_wiring_diagram(example_rules_1, filename='Wiring Verifications/feedback_loop_wiring')
 
 # --- Feedback Loop Network ---
-print("\n=== Majority Vote Netowrk ===")
-generate_truth_table(example_rules_2)
-detect_attractors(example_rules_2)
-generate_boolean_network_graph(example_rules_2, filename='Wiring Verifications/majority_vote_graph')
-generate_wiring_diagram(example_rules_2, filename='Wiring Verifications/majority_vote_wiring')
+#print("\n=== Majority Vote Netowrk ===")
+#detect_attractors(example_rules_2)
+#generate_boolean_network_graph(example_rules_2, filename='Wiring Verifications/majority_vote_graph')
+#generate_wiring_diagram(example_rules_2, filename='Wiring Verifications/majority_vote_wiring')
 
 # --- Feedback Loop Network ---
-print("\n=== Random Boolean Netowrk ===")
-generate_truth_table(example_rules_3)
-detect_attractors(example_rules_3)
-generate_boolean_network_graph(example_rules_3, filename='Wiring Verifications/random_network_graph')
-generate_wiring_diagram(example_rules_3, filename='Wiring Verifications/random_network_wiring')
+# print("\n=== Random Boolean Netowrk ===")
+# generate_truth_table(example_rules_3)
+# detect_attractors(example_rules_3)
+# generate_boolean_network_graph(example_rules_3, filename='Wiring Verifications/random_network_graph')
+# generate_wiring_diagram(example_rules_3, filename='Wiring Verifications/random_network_wiring')
 
+print("\n=== Poster ===")
+generate_truth_table(poster_rules)
+detect_attractors(poster_rules)
+generate_boolean_network_graph(poster_rules, filename='Wiring Verifications/poster_graph')
+generate_wiring_diagram(poster_rules, filename='Wiring Verifications/poster_wiring')

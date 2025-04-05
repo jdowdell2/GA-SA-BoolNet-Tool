@@ -1,7 +1,7 @@
 from graphviz import Digraph
 from itertools import product
 
-from rules import RuleLoader
+from boolean_network_representation.rules import RuleLoader
 from graphviz import Digraph
 
 
